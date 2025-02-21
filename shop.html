@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIN | Shop</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap');
+        body {
+            font-family: 'Cormorant Garamond', serif;
+        }
+    </style>
+</head>
+<body class="bg-white" x-data="{ 
+    cartOpen: false,
+    cartItems: [],
+    selectedSize: '',
+    showSizeGuide: false,
+    addToCart(product) {
+        if (this.selectedSize) {
+            this.cartItems.push({...product, size: this.selectedSize});
+            this.cartOpen = true;
+        }
+    }
+}" x-init="() => { AOS.init(); }">
+
+    <!-- Navigation (same as index.html) -->
+    <nav class="fixed w-full bg-white bg-opacity-95 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-1 flex justify-between items-center">
+                    <a href="index.html" class="text-3xl font-light tracking-widest">SEIN</a>
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#" class="text-gray-800 hover:text-gray-600">Collections</a>
+                        <a href="#" class="text-gray-800 hover:text-gray-600">Shop</a>
+                        <a href="#" class="text-gray-800 hover:text-gray-600">Lookbook</a>
+                        <a href="#" class="text-gray-800 hover:text-gray-600">Contact</a>
+                    </div>
+                    <button @click="cartOpen = !cartOpen" class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span x-show="cartItems.length" class="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs" x-text="cartItems.length"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Shopping Cart Sidebar -->
+    <div x-show="cartOpen" class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 transform transition-transform duration-300" 
+         @click.away="cartOpen = false">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-light">Shopping Cart</h3>
+                <button @click="cartOpen = false">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <template x-for="(item, index) in cartItems" :key="index">
+                    <div class="flex items-center space-x-4">
+                        <img :src="item.image" :alt="item.name" class="w-20 h-20 object-cover">
+                        <div>
+                            <h4 x-text="item.name" class="font-light"></h4>
+                            <p class="text-sm text-gray-600" x-text="'Size: ' + item.size"></p>
+                            <p class="text-sm" x-text="'$' + item.price"></p>
+                        </div>
+                        <button @click="cartItems.splice(index, 1)" class="text-sm text-gray-500">&times;</button>
+                    </div>
+                </template>
+            </div>
+            <div class="mt-6 border-t pt-4">
+                <p class="flex justify-between mb-4">
+                    <span>Total:</span>
+                    <span x-text="'$' + cartItems.reduce((sum, item) => sum + item.price, 0)"></span>
+                </p>
+                <button class="w-full bg-gray-900 text-white py-2 hover:bg-gray-800">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Header -->
+    <header class="pt-24 pb-12 text-center">
+        <h1 class="text-4xl font-light mb-4">Shop Collection</h1>
+        <p class="text-gray-600">Discover our latest pieces</p>
+    </header>
+
+    <!-- Product Grid -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Product Card -->
+            <div class="group" data-aos="fade-up">
+                <div class="relative overflow-hidden">
+                    <img src="/api/placeholder/600/800" alt="Product 1" class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300"></div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <h3 class="text-xl font-light">Silk Evening Dress</h3>
+                    <p class="text-gray-600">$890</p>
+                    <button @click="selectedSize = ''; showSizeGuide = true" class="text-sm text-gray-500 hover:text-gray-800">Size Guide</button>
+                    <div class="flex space-x-2">
+                        <button @click="selectedSize = 'S'" :class="{'bg-gray-800 text-white': selectedSize === 'S'}" class="px-3 py-1 border">S</button>
+                        <button @click="selectedSize = 'M'" :class="{'bg-gray-800 text-white': selectedSize === 'M'}" class="px-3 py-1 border">M</button>
+                        <button @click="selectedSize = 'L'" :class="{'bg-gray-800 text-white': selectedSize === 'L'}" class="px-3 py-1 border">L</button>
+                    </div>
+                    <button @click="addToCart({name: 'Silk Evening Dress', price: 890, image: '/api/placeholder/600/800'})" 
+                            class="w-full bg-gray-800 text-white py-2 mt-4 hover:bg-gray-700 transition-colors">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+            <!-- More product cards... -->
+        </div>
+    </section>
+
+    <!-- Size Guide Modal -->
+    <div x-show="showSizeGuide" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 max-w-2xl w-full mx-4" @click.away="showSizeGuide = false">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-light">Size Guide</h3>
+                <button @click="showSizeGuide = false">&times;</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-2 text-left">Size</th>
+                            <th class="py-2 text-left">Bust</th>
+                            <th class="py-2 text-left">Waist</th>
+                            <th class="py-2 text-left">Hip</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b">
+                            <td class="py-2">S</td>
+                            <td class="py-2">32-34"</td>
+                            <td class="py-2">24-26"</td>
+                            <td class="py-2">34-36"</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="py-2">M</td>
+                            <td class="py-2">34-36"</td>
+                            <td class="py-2">26-28"</td>
+                            <td class="py-2">36-38"</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2">L</td>
+                            <td class="py-2">36-38"</td>
+                            <td class="py-2">28-30"</td>
+                            <td class="py-2">38-40"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (same as index.html) -->
+    <footer class="bg-gray-900 text-white py-12 mt-24">
+        <!-- Footer content same as index.html -->
+    </footer>
+</body>
+</html>
