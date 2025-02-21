@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIN | Women's Denim</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap');
+        body {
+            font-family: 'Cormorant Garamond', serif;
+        }
+    </style>
+</head>
+<body class="bg-white" x-data="{ showSizeGuide: false }">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white bg-opacity-95 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-1 flex justify-between items-center">
+                    <a href="index.html" class="text-3xl font-light tracking-widest">SEIN</a>
+                    <div class="hidden md:flex space-x-8">
+                        <a href="collections.html" class="text-gray-800 hover:text-gray-600">Collections</a>
+                        <a href="shop.html" class="text-gray-800 hover:text-gray-600">Shop</a>
+                        <a href="lookbook.html" class="text-gray-800 hover:text-gray-600">Lookbook</a>
+                        <a href="contact.html" class="text-gray-800 hover:text-gray-600">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Category Header -->
+    <header class="pt-32 pb-12 text-center bg-gray-50">
+        <h1 class="text-4xl font-light mb-4">Women's Denim</h1>
+        <p class="text-gray-600 max-w-2xl mx-auto px-4">Premium denim crafted from Japanese and Italian fabrics, designed for the perfect fit.</p>
+    </header>
+
+    <!-- Product Grid -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <!-- Product Card -->
+            <div class="group">
+                <div class="relative overflow-hidden">
+                    <img src="/api/placeholder/600/800" alt="High Rise Slim" class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
+                <div class="mt-6 space-y-2">
+                    <h3 class="text-xl font-light">High Rise Slim</h3>
+                    <p class="text-gray-600">Dark Indigo Wash</p>
+                    <p class="text-gray-900">$245</p>
+                    <button @click="showSizeGuide = true" class="text-sm text-gray-500 hover:text-gray-900">Size Guide</button>
+                </div>
+            </div>
+
+            <!-- Product Card -->
+            <div class="group">
+                <div class="relative overflow-hidden">
+                    <img src="/api/placeholder/600/800" alt="Classic Straight" class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
+                <div class="mt-6 space-y-2">
+                    <h3 class="text-xl font-light">Classic Straight</h3>
+                    <p class="text-gray-600">Vintage Light Wash</p>
+                    <p class="text-gray-900">$235</p>
+                    <button @click="showSizeGuide = true" class="text-sm text-gray-500 hover:text-gray-900">Size Guide</button>
+                </div>
+            </div>
+
+            <!-- Product Card -->
+            <div class="group">
+                <div class="relative overflow-hidden">
+                    <img src="/api/placeholder/600/800" alt="Wide Leg" class="w-full h-96 object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
+                <div class="mt-6 space-y-2">
+                    <h3 class="text-xl font-light">Wide Leg</h3>
+                    <p class="text-gray-600">Raw Japanese Denim</p>
+                    <p class="text-gray-900">$265</p>
+                    <button @click="showSizeGuide = true" class="text-sm text-gray-500 hover:text-gray-900">Size Guide</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Size Guide Modal -->
+    <div x-show="showSizeGuide" 
+         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 max-w-2xl w-full mx-4" @click.away="showSizeGuide = false">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-light">Size Guide</h3>
+                <button @click="showSizeGuide = false">&times;</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-2 text-left">Size</th>
+                            <th class="py-2 text-left">Waist</th>
+                            <th class="py-2 text-left">Hip</th>
+                            <th class="py-2 text-left">Inseam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b">
+                            <td class="py-2">24</td>
+                            <td class="py-2">24"</td>
+                            <td class="py-2">34"</td>
+                            <td class="py-2">30"</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="py-2">25</td>
+                            <td class="py-2">25"</td>
+                            <td class="py-2">35"</td>
+                            <td class="py-2">30"</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="py-2">26</td>
+                            <td class="py-2">26"</td>
+                            <td class="py-2">36"</td>
+                            <td class="py-2">30"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-24">
+        <!-- Footer content -->
+    </footer>
+</body>
+</html>
