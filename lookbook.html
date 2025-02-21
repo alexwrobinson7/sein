@@ -86,26 +86,15 @@
         <div class="hidden md:block w-64 bg-white border-r p-8">
             <div class="sticky top-24">
                 <h2 class="text-2xl font-light mb-8">Collections</h2>
-                <div class="space-y-6">
                     <!-- Women's Categories -->
                     <div class="mb-8">
                         <h3 class="text-lg font-light mb-4 text-gray-400">Women</h3>
                         <div class="space-y-4">
-                            <a href="#" @click.prevent="selectedCollection = 'womens-denim'" 
-                               :class="{'text-gray-900': selectedCollection === 'womens-denim', 'text-gray-500': selectedCollection !== 'womens-denim'}"
-                               class="block hover:text-gray-900 transition-colors">Denim</a>
-                            <a href="#" @click.prevent="selectedCollection = 'womens-knits'"
-                               :class="{'text-gray-900': selectedCollection === 'womens-knits', 'text-gray-500': selectedCollection !== 'womens-knits'}"
-                               class="block hover:text-gray-900 transition-colors">Knits & Sweaters</a>
-                            <a href="#" @click.prevent="selectedCollection = 'womens-outerwear'"
-                               :class="{'text-gray-900': selectedCollection === 'womens-outerwear', 'text-gray-500': selectedCollection !== 'womens-outerwear'}"
-                               class="block hover:text-gray-900 transition-colors">Outerwear</a>
-                            <a href="#" @click.prevent="selectedCollection = 'womens-basics'"
-                               :class="{'text-gray-900': selectedCollection === 'womens-basics', 'text-gray-500': selectedCollection !== 'womens-basics'}"
-                               class="block hover:text-gray-900 transition-colors">Essentials</a>
-                            <a href="#" @click.prevent="selectedCollection = 'womens-dresses'"
-                               :class="{'text-gray-900': selectedCollection === 'womens-dresses', 'text-gray-500': selectedCollection !== 'womens-dresses'}"
-                               class="block hover:text-gray-900 transition-colors">Dresses</a>
+                            <a href="womens-denim.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Denim</a>
+                            <a href="womens-knits.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Knits & Sweaters</a>
+                            <a href="womens-outerwear.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Outerwear</a>
+                            <a href="womens-basics.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Essentials</a>
+                            <a href="womens-dresses.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Dresses</a>
                         </div>
                     </div>
 
@@ -113,18 +102,19 @@
                     <div class="mb-8">
                         <h3 class="text-lg font-light mb-4 text-gray-400">Men</h3>
                         <div class="space-y-4">
-                            <a href="#" @click.prevent="selectedCollection = 'mens-denim'"
-                               :class="{'text-gray-900': selectedCollection === 'mens-denim', 'text-gray-500': selectedCollection !== 'mens-denim'}"
-                               class="block hover:text-gray-900 transition-colors">Denim</a>
-                            <a href="#" @click.prevent="selectedCollection = 'mens-knits'"
-                               :class="{'text-gray-900': selectedCollection === 'mens-knits', 'text-gray-500': selectedCollection !== 'mens-knits'}"
-                               class="block hover:text-gray-900 transition-colors">Knits & Sweaters</a>
-                            <a href="#" @click.prevent="selectedCollection = 'mens-outerwear'"
-                               :class="{'text-gray-900': selectedCollection === 'mens-outerwear', 'text-gray-500': selectedCollection !== 'mens-outerwear'}"
-                               class="block hover:text-gray-900 transition-colors">Outerwear</a>
-                            <a href="#" @click.prevent="selectedCollection = 'mens-basics'"
-                               :class="{'text-gray-900': selectedCollection === 'mens-basics', 'text-gray-500': selectedCollection !== 'mens-basics'}"
-                               class="block hover:text-gray-900 transition-colors">Essentials</a>
+                            <a href="mens-denim.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Denim</a>
+                            <a href="mens-knits.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Knits & Sweaters</a>
+                            <a href="mens-outerwear.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Outerwear</a>
+                            <a href="mens-basics.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Essentials</a>
+                        </div>
+                    </div>
+
+                    <!-- Seasonal Collections -->
+                    <div>
+                        <h3 class="text-lg font-light mb-4 text-gray-400">New Arrivals</h3>
+                        <div class="space-y-4">
+                            <a href="new-arrivals.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Latest Collection</a>
+                            <a href="coming-soon.html" class="block text-gray-500 hover:text-gray-900 transition-colors">Coming Soon</a>
                         </div>
                     </div>
 
