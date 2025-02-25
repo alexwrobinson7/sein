@@ -22,7 +22,840 @@
     </div>
   </div>
   
-  <!-- Include the survey JavaScript -->
-  <script src="agent-ally-survey.js"></script>
-</body>
-</html>
+  <!-- Embedded JavaScript for the survey -->
+  <script>
+    // Agent Ally Survey in Vanilla JavaScript
+    // This script creates a dynamic survey that adjusts based on whether the user is buying, selling, or both
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Survey configuration
+      const featureOptions = [
+        'Garage', 'Basement', 'Pool', 'Yard', 'Deck/Patio', 
+        'Fireplace', 'Open Floor Plan', 'Updated Kitchen', 
+        'Updated Bathrooms', 'Central AC', 'Smart Home'
+      ];
+
+      const homeTypeOptions = [
+        'Single-family Home', 'Townhouse', 'Condo/Apartment', 
+        'Multi-family Home', 'New Construction', 'Fixer-upper'
+      ];
+
+      // Initial state
+      let currentStep = 0;
+      let answers = {
+        userType: '',
+        // Buyer specific
+        location: '',
+        priceMin: '',
+        priceMax: '',
+        bedrooms: '',
+        bathrooms: '',
+        homeType: '',
+        sqftMin: '',
+        moveInTimeframe: '',
+        preApproved: '',
+        preApprovedAmount: '',
+        additionalFeatures: [],
+        // Seller specific
+        propertyAddress: '',
+        currentHomeType: '',
+        currentBedrooms: '',
+        currentBathrooms: '',
+        currentSqft: '',
+        lotSize: '',
+        yearBuilt: '',
+        lastRenovated: '',
+        sellingTimeframe: '',
+        reasonForSelling: '',
+        expectedPrice: '',
+        // Common fields
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        contactPreference: '',
+        agreeToTerms: false
+      };
+
+      // Get main container
+      const surveyContainer = document.getElementById('agent-ally-survey');
+      if (!surveyContainer) {
+        console.error('Survey container not found');
+        return;
+      }
+
+      // Initialize the survey
+      renderSurvey();
+
+      // Main render function
+      function renderSurvey() {
+        // Clear the container
+        surveyContainer.innerHTML = '';
+
+        // Create header
+        const header = createHeader();
+        surveyContainer.appendChild(header);
+
+        // Create progress bar (except for first and thank you screens)
+        if (currentStep !== 0 && currentStep !== 1000) {
+          const progressBar = createProgressBar();
+          surveyContainer.appendChild(progressBar);
+        }
+
+        // Create the form content
+        const formContent = document.createElement('div');
+        formContent.className = 'bg-white rounded-lg p-6 shadow-sm border border-gray-100';
+        
+        // Render the current step
+        const stepContent = renderStep();
+        formContent.appendChild(stepContent);
+
+        // Add navigation buttons
+        if (currentStep !== 0 && currentStep !== 1000) {
+          const navigationButtons = createNavigationButtons();
+          formContent.appendChild(navigationButtons);
+        } else if (currentStep === 0) {
+          const startButton = createStartButton();
+          formContent.appendChild(startButton);
+        }
+
+        surveyContainer.appendChild(formContent);
+      }
+
+      // Create header function
+      function createHeader() {
+        const header = document.createElement('div');
+        header.className = 'flex items-center mb-8';
+        header.innerHTML = `
+          <div class="mr-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-blue-600">Agent Ally</h1>
+            <p class="text-gray-600">Buy and sell with 0% commission using AI</p>
+          </div>
+        `;
+        return header;
+      }
+
+      // Create progress bar function
+      function createProgressBar() {
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'mb-8';
+
+        const progress = calculateProgress();
+        
+        progressContainer.innerHTML = `
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-600 rounded-full" style="width: ${progress}%"></div>
+          </div>
+          <div class="flex justify-between mt-2 text-xs text-gray-500">
+            <span>Start</span>
+            <span>Halfway</span>
+            <span>Complete</span>
+          </div>
+        `;
+        
+        return progressContainer;
+      }
+
+      // Calculate progress percentage
+      function calculateProgress() {
+        const totalSteps = answers.userType === 'buyer' ? 13 : 
+                          answers.userType === 'seller' ? 14 : 
+                          answers.userType === 'both' ? 24 : 1;
+        
+        let currentProgress = currentStep;
+        
+        // Adjust for jumps in step numbers
+        if (currentStep >= 100 && currentStep < 200) {
+          currentProgress = currentStep - 90;
+        } else if (currentStep >= 200) {
+          currentProgress = totalSteps - 3 + (currentStep - 200);
+        }
+        
+        return Math.min(Math.round((currentProgress / totalSteps) * 100), 100);
+      }
+
+      // Create navigation buttons
+      function createNavigationButtons() {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'flex justify-between mt-8';
+
+        // Back button
+        const backButton = document.createElement('button');
+        backButton.className = 'px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+        backButton.textContent = 'Back';
+        backButton.addEventListener('click', () => {
+          currentStep = currentStep === 203 ? 202 : Math.max(0, currentStep - 1);
+          renderSurvey();
+        });
+
+        // Next/Submit button
+        const nextButton = document.createElement('button');
+        nextButton.className = `px-6 py-2 rounded-full flex items-center ${canProceed() ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`;
+        nextButton.innerHTML = `
+          ${currentStep === 203 ? 'Submit' : 'Next'}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        `;
+        nextButton.disabled = !canProceed();
+        
+        if (canProceed()) {
+          nextButton.addEventListener('click', handleNavigation);
+        }
+
+        buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(nextButton);
+        
+        return buttonContainer;
+      }
+
+      // Create start button for first screen
+      function createStartButton() {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'flex justify-center mt-8';
+
+        const startButton = document.createElement('button');
+        startButton.className = `px-8 py-3 rounded-full flex items-center ${canProceed() ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`;
+        startButton.innerHTML = `
+          Get Started
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        `;
+        startButton.disabled = !canProceed();
+        
+        if (canProceed()) {
+          startButton.addEventListener('click', nextStep);
+        }
+
+        buttonContainer.appendChild(startButton);
+        return buttonContainer;
+      }
+
+      // Function to handle checkbox changes
+      function handleCheckboxChange(feature) {
+        const currentFeatures = [...answers.additionalFeatures];
+        
+        if (currentFeatures.includes(feature)) {
+          // Remove if already selected
+          const updatedFeatures = currentFeatures.filter(f => f !== feature);
+          answers.additionalFeatures = updatedFeatures;
+        } else {
+          // Add if not selected
+          answers.additionalFeatures = [...currentFeatures, feature];
+        }
+        
+        renderSurvey();
+      }
+
+      // Function to handle value changes
+      function handleChange(field, value) {
+        answers[field] = value;
+        renderSurvey();
+      }
+
+      // Function to move to next step
+      function nextStep() {
+        // Skip steps based on user type
+        if (currentStep === 0) {
+          if (answers.userType === 'buyer') {
+            currentStep = 1; // Go to buyer questions
+          } else if (answers.userType === 'seller') {
+            currentStep = 100; // Go to seller questions
+          } else if (answers.userType === 'both') {
+            currentStep = 1; // Start with buyer questions, then will go to seller
+          }
+        } else {
+          currentStep = currentStep + 1;
+        }
+        
+        renderSurvey();
+      }
+
+      // Function to handle navigation logic
+      function handleNavigation() {
+        // Case for buyer path
+        if (answers.userType === 'buyer' && currentStep === 9) {
+          currentStep = 200; // Jump to contact info
+          renderSurvey();
+          return;
+        }
+        
+        // Case for seller path
+        if (answers.userType === 'seller' && currentStep === 109) {
+          currentStep = 200; // Jump to contact info
+          renderSurvey();
+          return;
+        }
+        
+        // Case for both paths (after seller info)
+        if (answers.userType === 'both' && currentStep === 109) {
+          currentStep = 200; // Jump to contact info
+          renderSurvey();
+          return;
+        }
+        
+        // Case for review
+        if (currentStep === 202) {
+          currentStep = 203; // Review page
+          renderSurvey();
+          return;
+        }
+        
+        // Submit case
+        if (currentStep === 203) {
+          handleSubmit();
+          return;
+        }
+        
+        // Default next step
+        nextStep();
+      }
+
+      // Submit function
+      function handleSubmit() {
+        console.log('Survey Submitted:', answers);
+        
+        // You can add an AJAX submission here
+        // Example:
+        // fetch('/api/submit-survey', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify(answers),
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //   console.log('Success:', data);
+        //   currentStep = 1000;
+        //   renderSurvey();
+        // })
+        // .catch((error) => {
+        //   console.error('Error:', error);
+        // });
+        
+        // For now, just go to thank you screen
+        currentStep = 1000;
+        renderSurvey();
+      }
+
+      // Determine if the current step can proceed
+      function canProceed() {
+        switch(currentStep) {
+          case 0:
+            return answers.userType !== '';
+          case 1:
+            return answers.location !== '';
+          case 2:
+            return answers.priceMin !== '' && answers.priceMax !== '';
+          case 3:
+            return answers.bedrooms !== '' && answers.bathrooms !== '';
+          case 4:
+            return answers.homeType !== '';
+          case 5:
+            return answers.sqftMin !== '';
+          case 6:
+            return answers.moveInTimeframe !== '';
+          case 7:
+            return answers.preApproved !== '';
+          case 8:
+            return answers.preApproved === 'no' || answers.preApprovedAmount !== '';
+          case 9:
+            return true; // Additional features is optional
+          case 10:
+          case 100:
+            return answers.propertyAddress !== '';
+          case 101:
+            return answers.currentHomeType !== '';
+          case 102:
+            return answers.currentBedrooms !== '' && answers.currentBathrooms !== '';
+          case 103:
+            return answers.currentSqft !== '';
+          case 104:
+            return answers.lotSize !== '';
+          case 105:
+            return answers.yearBuilt !== '';
+          case 106:
+            return answers.lastRenovated !== '';
+          case 107:
+            return answers.sellingTimeframe !== '';
+          case 108:
+            return answers.reasonForSelling !== '';
+          case 109:
+            return answers.expectedPrice !== '';
+          case 200:
+            return answers.firstName !== '' && answers.lastName !== '';
+          case 201:
+            return answers.email !== '' && answers.phone !== '';
+          case 202:
+            return answers.contactPreference !== '';
+          case 203:
+            return answers.agreeToTerms === true;
+          default:
+            return true;
+        }
+      }
+
+      // Function to render current step
+      function renderStep() {
+        const step = document.createElement('div');
+        
+        switch(currentStep) {
+          case 0:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-2xl font-bold text-center mb-6">Welcome to Agent Ally</h2>
+                <p class="text-lg text-center mb-6">Are you interested in buying or selling a property?</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button 
+                    class="p-6 rounded-lg border-2 flex flex-col items-center ${answers.userType === 'buyer' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                    id="buyer-button"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${answers.userType === 'buyer' ? 'text-blue-500' : 'text-gray-400'}">
+                      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="mt-2 font-medium">I'm Buying</span>
+                  </button>
+                  
+                  <button 
+                    class="p-6 rounded-lg border-2 flex flex-col items-center ${answers.userType === 'seller' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                    id="seller-button"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${answers.userType === 'seller' ? 'text-blue-500' : 'text-gray-400'}">
+                      <line x1="12" y1="1" x2="12" y2="23"></line>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span class="mt-2 font-medium">I'm Selling</span>
+                  </button>
+                  
+                  <button 
+                    class="p-6 rounded-lg border-2 flex flex-col items-center ${answers.userType === 'both' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                    id="both-button"
+                  >
+                    <div class="flex">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${answers.userType === 'both' ? 'text-blue-500' : 'text-gray-400'}">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${answers.userType === 'both' ? 'text-blue-500' : 'text-gray-400'}">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                    </div>
+                    <span class="mt-2 font-medium">I'm Doing Both</span>
+                  </button>
+                </div>
+              </div>
+            `;
+            
+            // Add event listeners after creating the content
+            setTimeout(() => {
+              document.getElementById('buyer-button')?.addEventListener('click', () => handleChange('userType', 'buyer'));
+              document.getElementById('seller-button')?.addEventListener('click', () => handleChange('userType', 'seller'));
+              document.getElementById('both-button')?.addEventListener('click', () => handleChange('userType', 'both'));
+            }, 0);
+            break;
+
+          // ----- BUYER QUESTIONS ----- //
+          case 1:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">Where are you looking to buy?</h2>
+                <div class="space-y-4">
+                  <label class="block">
+                    <span class="text-gray-700">Preferred location (City, State, or Zip Code)</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      <input
+                        type="text"
+                        id="location-input"
+                        value="${answers.location}"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter city, state, or zip code"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('location-input')?.addEventListener('input', (e) => handleChange('location', e.target.value));
+            }, 0);
+            break;
+          
+          case 2:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">What's your budget?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="block">
+                    <span class="text-gray-700">Minimum price</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <input
+                        type="number"
+                        id="price-min-input"
+                        value="${answers.priceMin}"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Min price"
+                      />
+                    </div>
+                  </label>
+                  
+                  <label class="block">
+                    <span class="text-gray-700">Maximum price</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <input
+                        type="number"
+                        id="price-max-input"
+                        value="${answers.priceMax}"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Max price"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('price-min-input')?.addEventListener('input', (e) => handleChange('priceMin', e.target.value));
+              document.getElementById('price-max-input')?.addEventListener('input', (e) => handleChange('priceMax', e.target.value));
+            }, 0);
+            break;
+          
+          case 3:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">How many bedrooms and bathrooms do you need?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="block">
+                    <span class="text-gray-700">Bedrooms</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <path d="M2 9V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"></path>
+                        <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5"></path>
+                        <path d="M2 12h20"></path>
+                        <path d="M4 9v3"></path>
+                        <path d="M20 9v3"></path>
+                      </svg>
+                      <select
+                        id="bedrooms-select"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="" ${answers.bedrooms === '' ? 'selected' : ''}>Select</option>
+                        <option value="1" ${answers.bedrooms === '1' ? 'selected' : ''}>1+ bedrooms</option>
+                        <option value="2" ${answers.bedrooms === '2' ? 'selected' : ''}>2+ bedrooms</option>
+                        <option value="3" ${answers.bedrooms === '3' ? 'selected' : ''}>3+ bedrooms</option>
+                        <option value="4" ${answers.bedrooms === '4' ? 'selected' : ''}>4+ bedrooms</option>
+                        <option value="5" ${answers.bedrooms === '5' ? 'selected' : ''}>5+ bedrooms</option>
+                      </select>
+                    </div>
+                  </label>
+                  
+                  <label class="block">
+                    <span class="text-gray-700">Bathrooms</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path>
+                        <line x1="10" y1="6" x2="20" y2="6"></line>
+                        <line x1="10" y1="11" x2="20" y2="11"></line>
+                      </svg>
+                      <select
+                        id="bathrooms-select"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="" ${answers.bathrooms === '' ? 'selected' : ''}>Select</option>
+                        <option value="1" ${answers.bathrooms === '1' ? 'selected' : ''}>1+ bathrooms</option>
+                        <option value="1.5" ${answers.bathrooms === '1.5' ? 'selected' : ''}>1.5+ bathrooms</option>
+                        <option value="2" ${answers.bathrooms === '2' ? 'selected' : ''}>2+ bathrooms</option>
+                        <option value="2.5" ${answers.bathrooms === '2.5' ? 'selected' : ''}>2.5+ bathrooms</option>
+                        <option value="3" ${answers.bathrooms === '3' ? 'selected' : ''}>3+ bathrooms</option>
+                        <option value="3.5" ${answers.bathrooms === '3.5' ? 'selected' : ''}>3.5+ bathrooms</option>
+                        <option value="4" ${answers.bathrooms === '4' ? 'selected' : ''}>4+ bathrooms</option>
+                      </select>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('bedrooms-select')?.addEventListener('change', (e) => handleChange('bedrooms', e.target.value));
+              document.getElementById('bathrooms-select')?.addEventListener('change', (e) => handleChange('bathrooms', e.target.value));
+            }, 0);
+            break;
+          
+          // For the rest of the steps, I'll show a couple more examples. 
+          // You would need to implement all steps in a similar way
+
+          case 4:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">What type of home are you looking for?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="home-type-container">
+                  ${homeTypeOptions.map(type => `
+                    <button 
+                      class="p-4 rounded-lg border-2 text-left ${answers.homeType === type ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                      data-type="${type}"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 ${answers.homeType === type ? 'text-blue-500' : 'text-gray-400'}">
+                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                      </svg>
+                      <span class="font-medium">${type}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              const buttons = document.querySelectorAll('#home-type-container button');
+              buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                  const type = button.getAttribute('data-type');
+                  handleChange('homeType', type);
+                });
+              });
+            }, 0);
+            break;
+            
+          case 5:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">How much space do you need?</h2>
+                <div class="space-y-4">
+                  <label class="block">
+                    <span class="text-gray-700">Minimum square footage</span>
+                    <div class="mt-1 relative">
+                      <input
+                        type="number"
+                        id="sqft-min-input"
+                        value="${answers.sqftMin}"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Min square feet"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('sqft-min-input')?.addEventListener('input', (e) => handleChange('sqftMin', e.target.value));
+            }, 0);
+            break;
+            
+          case 6:
+            const timeframes = ['ASAP', 'Within 1 Month', '1-3 Months', '3-6 Months', '6+ Months', 'Just Looking'];
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">When are you looking to move?</h2>
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="timeframe-container">
+                    ${timeframes.map(timeframe => `
+                      <button 
+                        class="p-4 rounded-lg border-2 text-left ${answers.moveInTimeframe === timeframe ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                        data-timeframe="${timeframe}"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 ${answers.moveInTimeframe === timeframe ? 'text-blue-500' : 'text-gray-400'}">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span class="font-medium">${timeframe}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              const buttons = document.querySelectorAll('#timeframe-container button');
+              buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                  const timeframe = button.getAttribute('data-timeframe');
+                  handleChange('moveInTimeframe', timeframe);
+                });
+              });
+            }, 0);
+            break;
+            
+          case 7:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">Are you pre-approved for a mortgage?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button 
+                    id="pre-approved-yes"
+                    class="p-4 rounded-lg border-2 text-left ${answers.preApproved === 'yes' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 ${answers.preApproved === 'yes' ? 'text-blue-500' : 'text-gray-400'}">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span class="font-medium">Yes, I'm pre-approved</span>
+                  </button>
+                  
+                  <button 
+                    id="pre-approved-no"
+                    class="p-4 rounded-lg border-2 text-left ${answers.preApproved === 'no' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                  >
+                    <span class="font-medium">No, not yet</span>
+                  </button>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('pre-approved-yes')?.addEventListener('click', () => handleChange('preApproved', 'yes'));
+              document.getElementById('pre-approved-no')?.addEventListener('click', () => handleChange('preApproved', 'no'));
+            }, 0);
+            break;
+            
+          case 8:
+            if (answers.preApproved === 'yes') {
+              step.innerHTML = `
+                <div class="space-y-6">
+                  <h2 class="text-xl font-bold">What's your pre-approved loan amount?</h2>
+                  <div class="space-y-4">
+                    <label class="block">
+                      <div class="mt-1 relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                          <line x1="12" y1="1" x2="12" y2="23"></line>
+                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <input
+                          type="number"
+                          id="pre-approved-amount"
+                          value="${answers.preApprovedAmount}"
+                          class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Pre-approved amount"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              `;
+              
+              setTimeout(() => {
+                document.getElementById('pre-approved-amount')?.addEventListener('input', (e) => handleChange('preApprovedAmount', e.target.value));
+              }, 0);
+            } else {
+              nextStep();
+            }
+            break;
+            
+          case 9:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">What features are important to you?</h2>
+                <p class="text-gray-600">Select all that apply</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="features-container">
+                  ${featureOptions.map(feature => `
+                    <label 
+                      class="p-4 rounded-lg border-2 flex items-center cursor-pointer ${answers.additionalFeatures.includes(feature) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+                      data-feature="${feature}"
+                    >
+                      <input
+                        type="checkbox"
+                        class="sr-only feature-checkbox"
+                        data-feature="${feature}"
+                        ${answers.additionalFeatures.includes(feature) ? 'checked' : ''}
+                      />
+                      <span class="flex-shrink-0 h-5 w-5 mr-2 rounded border ${answers.additionalFeatures.includes(feature) ? 'bg-blue-500 border-blue-500 flex items-center justify-center' : 'border-gray-300'}">
+                        ${answers.additionalFeatures.includes(feature) ? `
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        ` : ''}
+                      </span>
+                      <span class="font-medium">${feature}</span>
+                    </label>
+                  `).join('')}
+                </div>
+                
+                <p class="text-center text-gray-600 mt-6">
+                  ${answers.userType === 'both' ? 'Now let\'s get information about your current property' : ''}
+                </p>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              const checkboxes = document.querySelectorAll('.feature-checkbox');
+              checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                  const feature = checkbox.getAttribute('data-feature');
+                  handleCheckboxChange(feature);
+                });
+              });
+              
+              // Also make the labels clickable
+              const labels = document.querySelectorAll('#features-container label');
+              labels.forEach(label => {
+                label.addEventListener('click', (e) => {
+                  // Prevent default to avoid double-triggering
+                  if (e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    const feature = label.getAttribute('data-feature');
+                    handleCheckboxChange(feature);
+                  }
+                });
+              });
+            }, 0);
+            break;
+            
+          // ----- SELLER QUESTIONS ----- //
+          case 100:
+            step.innerHTML = `
+              <div class="space-y-6">
+                <h2 class="text-xl font-bold">Tell us about your property</h2>
+                <div class="space-y-4">
+                  <label class="block">
+                    <span class="text-gray-700">Property Address</span>
+                    <div class="mt-1 relative">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute top-3 left-3 text-gray-400">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      <input
+                        type="text"
+                        id="property-address"
+                        value="${answers.propertyAddress}"
+                        class="w-full pl-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Full property address"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            `;
+            
+            setTimeout(() => {
+              document.getElementById('property-address')?.addEventListener('input', (e) => handleChange('propertyAddress', e.target.value));
+            }, 0);
+            break;
